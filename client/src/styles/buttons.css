@@ -1,0 +1,50 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #3730a3;
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: #ffffff;
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+.btn-warning {
+  background: var(--color-warning);
+  color: #ffffff;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
