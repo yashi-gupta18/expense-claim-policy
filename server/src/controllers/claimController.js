@@ -1,29 +1,30 @@
 import Claim from '../models/Claim.js';
 import Review from '../models/Review.js';
-import { claimCreateSchema, decisionSchema } from '../validators/claimValidator.js';
+import { claimCreateSchema, clarificationSchema, decisionSchema } from '../validators/claimValidator.js';
 import { retrieveRelevantPolicies } from '../services/policyRetrievalService.js';
 import { runDeterministicValidation } from '../services/deterministicValidationService.js';
 import { runAiReview } from '../services/aiReviewService.js';
 import { createAuditLog } from '../services/auditService.js';
 
-function statusFromReviews(deterministicIssues, aiReview) {
-  if (deterministicIssues.some((issue) => issue.severity === 'high' && issue.type !== 'future_date')) return 'non_compliant';
-  return aiReview?.status || 'pending';
+function escapeRegex(value = '') {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export async function createClaim(req, res, next) {
   try {
     const payload = claimCreateSchema.parse(req.body);
+    const claimantName = payload.claimantName || payload.claimant;
     const policies = await retrieveRelevantPolicies(payload);
     const deterministicIssues = await runDeterministicValidation(payload, policies);
     const aiReview = await runAiReview(payload, policies, deterministicIssues);
     const claim = await Claim.create({
       ...payload,
+      claimantName,
       deterministicIssues,
       aiReview,
-      status: statusFromReviews(deterministicIssues, aiReview)
+      status: 'pending'
     });
-    await createAuditLog({ claim: claim._id, action: 'claim_created', message: 'Claim submitted and reviewed by validation services.' });
+    await createAuditLog({ claim: claim._id, action: 'claim_created', message: 'Claim submitted and sent for reviewer decision.' });
     res.status(201).json(claim);
   } catch (error) {
     next(error);
@@ -32,15 +33,26 @@ export async function createClaim(req, res, next) {
 
 export async function getClaims(req, res, next) {
   try {
-    const { status, search } = req.query;
+    const { status, search, claimant, claimantId } = req.query;
     const query = {};
     if (status) query.status = status;
-    if (search) {
+    if (claimant) {
+      const exactClaimant = new RegExp(`^${escapeRegex(claimant)}$`, 'i');
       query.$or = [
+        { claimant: exactClaimant },
+        { claimantName: exactClaimant }
+      ];
+    }
+    if (claimantId) query.claimantId = claimantId;
+    if (search) {
+      const searchFilters = [
         { claimant: new RegExp(search, 'i') },
+        { claimantName: new RegExp(search, 'i') },
         { category: new RegExp(search, 'i') },
         { description: new RegExp(search, 'i') }
       ];
+      query.$and = query.$and || [];
+      query.$and.push({ $or: searchFilters });
     }
     const claims = await Claim.find(query).sort({ createdAt: -1 });
     res.json(claims);
@@ -68,7 +80,6 @@ export async function reviewClaimWithAi(req, res, next) {
     const aiReview = await runAiReview(claim.toObject(), policies, deterministicIssues);
     claim.deterministicIssues = deterministicIssues;
     claim.aiReview = aiReview;
-    claim.status = statusFromReviews(deterministicIssues, aiReview);
     await claim.save();
     await createAuditLog({ claim: claim._id, action: 'ai_review_completed', message: 'AI-assisted policy review was refreshed.' });
     res.json(claim);
@@ -103,10 +114,15 @@ export async function decideClaim(req, res, next) {
       claim.status = 'uncertain';
     } else {
       claim.status = nextStatus;
-      claim.finalDecision = nextStatus === 'approved' || nextStatus === 'rejected' ? nextStatus : 'needs_clarification';
+      claim.finalDecision = nextStatus === 'approved' || nextStatus === 'rejected' ? nextStatus : null;
       claim.finalDecisionReason = payload.reason;
+      if (payload.action === 'request_clarification') {
+        claim.clarificationRequest = payload.reason;
+      }
     }
     claim.reviewer = payload.reviewer;
+    claim.reviewedBy = payload.reviewer;
+    claim.reviewedAt = new Date();
     await claim.save();
 
     await Review.create({
@@ -124,6 +140,32 @@ export async function decideClaim(req, res, next) {
       action: `reviewer_${payload.action}`,
       message: `Reviewer action changed status from ${previousStatus} to ${claim.status}.`,
       metadata: { reason: payload.reason, overrideClassification: payload.overrideClassification }
+    });
+
+    res.json(claim);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function submitClarification(req, res, next) {
+  try {
+    const payload = clarificationSchema.parse(req.body);
+    const claim = await Claim.findById(req.params.id);
+    if (!claim) return res.status(404).json({ message: 'Claim not found' });
+
+    const previousStatus = claim.status;
+    claim.clarificationResponse = payload.clarificationResponse;
+    claim.clarificationProofLink = payload.clarificationProofLink || '';
+    claim.status = 'under_review';
+    await claim.save();
+
+    await createAuditLog({
+      claim: claim._id,
+      actor: payload.claimant || claim.claimantName || claim.claimant,
+      action: 'clarification_submitted',
+      message: `Claimant submitted clarification and status changed from ${previousStatus} to under_review.`,
+      metadata: { proofLink: claim.clarificationProofLink }
     });
 
     res.json(claim);

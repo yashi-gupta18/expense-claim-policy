@@ -71,7 +71,7 @@ const policies = [
 ];
 
 const claims = [
-  { claimant: 'Ananya Rao', date: new Date('2026-09-10'), category: 'Meals', amount: 850, currency: 'INR', description: 'Team lunch during client workshop', receiptAvailable: true },
+  { claimant: 'Sample Employee', date: new Date('2026-09-10'), category: 'Meals', amount: 850, currency: 'INR', description: 'Team lunch during client workshop', receiptAvailable: true },
   { claimant: 'Vikram Shah', date: new Date('2026-09-11'), category: 'Meals', amount: 1250, currency: 'INR', description: 'Client dinner after demo', receiptAvailable: false },
   { claimant: 'Leena Mathew', date: new Date('2026-09-12'), category: 'Travel', amount: 4800, currency: 'INR', description: 'Airport cab to customer site', receiptAvailable: true },
   { claimant: 'Leena Mathew', date: new Date('2026-09-12'), category: 'Travel', amount: 4800, currency: 'INR', description: 'Duplicate airport cab submission', receiptAvailable: true },
@@ -101,9 +101,10 @@ async function seed() {
     const aiReview = await runAiReview(input, relevantPolicies, deterministicIssues);
     const claim = await Claim.create({
       ...input,
+      claimantName: input.claimant,
       deterministicIssues,
       aiReview,
-      status: deterministicIssues.some((issue) => issue.severity === 'high') ? 'non_compliant' : aiReview.status
+      status: 'pending'
     });
     await AuditLog.create({ claim: claim._id, action: 'seeded', message: 'Seed claim created with validation results.' });
   }

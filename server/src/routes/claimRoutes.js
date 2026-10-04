@@ -1,5 +1,5 @@
 import express from 'express';
-import { createClaim, decideClaim, getClaim, getClaims, reviewClaimWithAi } from '../controllers/claimController.js';
+import { createClaim, decideClaim, getClaim, getClaims, reviewClaimWithAi, submitClarification } from '../controllers/claimController.js';
 
 const router = express.Router();
 
@@ -8,5 +8,6 @@ router.get('/', getClaims);
 router.get('/:id', getClaim);
 router.post('/:id/review-ai', reviewClaimWithAi);
 router.patch('/:id/decision', decideClaim);
+router.patch('/:id/clarification', submitClarification);
 
 export default router;

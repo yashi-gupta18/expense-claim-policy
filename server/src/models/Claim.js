@@ -38,6 +38,8 @@ const aiReviewSchema = new mongoose.Schema(
 const claimSchema = new mongoose.Schema(
   {
     claimant: { type: String, required: true, trim: true },
+    claimantName: { type: String, trim: true },
+    claimantId: { type: String, trim: true },
     date: { type: Date, required: true },
     category: { type: String, required: true, trim: true },
     amount: { type: Number, required: true },
@@ -52,10 +54,15 @@ const claimSchema = new mongoose.Schema(
       default: null
     },
     finalDecisionReason: { type: String, default: '' },
+    clarificationRequest: { type: String, default: '' },
+    clarificationResponse: { type: String, default: '' },
+    clarificationProofLink: { type: String, default: '' },
     reviewer: { type: String, default: '' },
+    reviewedBy: { type: String, default: '' },
+    reviewedAt: Date,
     status: {
       type: String,
-      enum: ['pending', 'compliant', 'non_compliant', 'needs_clarification', 'uncertain', 'approved', 'rejected'],
+      enum: ['pending', 'under_review', 'compliant', 'non_compliant', 'needs_clarification', 'uncertain', 'approved', 'rejected'],
       default: 'pending'
     }
   },

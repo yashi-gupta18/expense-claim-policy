@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export const claimCreateSchema = z.object({
   claimant: z.string().trim().min(2, 'Claimant is required'),
+  claimantName: z.string().trim().optional(),
+  claimantId: z.string().trim().optional(),
   date: z.coerce.date(),
   category: z.string().trim().min(1, 'Category is required'),
   amount: z.coerce.number().positive('Amount must be greater than zero'),
@@ -15,4 +17,10 @@ export const decisionSchema = z.object({
   reason: z.string().trim().min(3, 'Reason is required'),
   reviewer: z.string().trim().min(2).default('Mock Reviewer'),
   overrideClassification: z.string().trim().optional()
+});
+
+export const clarificationSchema = z.object({
+  clarificationResponse: z.string().trim().min(3, 'Clarification response is required'),
+  clarificationProofLink: z.string().trim().url('Proof link must be a valid URL').or(z.literal('')).optional(),
+  claimant: z.string().trim().optional()
 });
