@@ -22,7 +22,7 @@ function ReviewHistory() {
     <section className="panel">
       <div className="section-heading">
         <h2>Review History</h2>
-        <Link className="table-link" to={`/claims/${id}`}>Back to claim</Link>
+        <Link className="table-link" to={`/reviewer/claims/${id}`}>Back to claim</Link>
       </div>
       <div className="table-wrap">
         <table>

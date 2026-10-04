@@ -3,10 +3,19 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { createClaim } from '../api/claimsApi';
 import { CATEGORIES, CURRENCIES } from '../utils/constants';
+import { getMockSession, sessionIdFromName } from '../utils/mockSession';
 
 function SubmitClaim() {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: { currency: 'INR', category: 'Meals', receiptAvailable: true } });
+  const session = getMockSession();
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      claimant: session?.name || '',
+      currency: 'INR',
+      category: 'Meals',
+      receiptAvailable: true
+    }
+  });
   const [serverError, setServerError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -14,8 +23,12 @@ function SubmitClaim() {
     setSaving(true);
     setServerError('');
     try {
-      const claim = await createClaim(values);
-      navigate(`/claims/${claim._id}`, { state: { toast: 'Claim submitted and reviewed.' } });
+      await createClaim({
+        ...values,
+        claimantName: values.claimant,
+        claimantId: sessionIdFromName(values.claimant)
+      });
+      navigate('/claimant/dashboard', { state: { toast: 'Claim submitted successfully and sent for review.' } });
     } catch (error) {
       setServerError(error.response?.data?.message || 'Unable to submit claim.');
     } finally {

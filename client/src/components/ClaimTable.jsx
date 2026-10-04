@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
-function ClaimTable({ claims }) {
+function ClaimTable({ claims, linkBase = '/reviewer/claims', showAiAction = true, actionLabel = 'Review' }) {
   return (
     <div className="table-wrap">
       <table>
@@ -13,7 +13,7 @@ function ClaimTable({ claims }) {
             <th>Category</th>
             <th>Amount</th>
             <th>Status</th>
-            <th>AI action</th>
+            {showAiAction && <th>AI action</th>}
             <th></th>
           </tr>
         </thead>
@@ -25,8 +25,8 @@ function ClaimTable({ claims }) {
               <td>{claim.category}</td>
               <td>{formatCurrency(claim.amount, claim.currency)}</td>
               <td><StatusBadge status={claim.status} /></td>
-              <td>{claim.aiReview?.recommendedAction?.replaceAll('_', ' ') || '-'}</td>
-              <td><Link className="table-link" to={`/claims/${claim._id}`}>Review</Link></td>
+              {showAiAction && <td>{claim.aiReview?.recommendedAction?.replaceAll('_', ' ') || '-'}</td>}
+              <td><Link className="table-link" to={`${linkBase}/${claim._id}`}>{actionLabel}</Link></td>
             </tr>
           ))}
         </tbody>

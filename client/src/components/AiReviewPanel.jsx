@@ -1,4 +1,5 @@
 import StatusBadge from './StatusBadge';
+import { formatDateTime } from '../utils/formatters';
 
 function AiReviewPanel({ review, onRefresh, refreshing }) {
   if (!review) return null;
@@ -36,6 +37,10 @@ function AiReviewPanel({ review, onRefresh, refreshing }) {
         <div>
           <span>Fallback</span>
           <strong>{review.isFallback || review.isMock ? 'Yes' : 'No'}</strong>
+        </div>
+        <div>
+          <span>Reviewed at</span>
+          <strong>{review.reviewedAt ? formatDateTime(review.reviewedAt) : '-'}</strong>
         </div>
       </div>
       {(review.isFallback || review.isMock) && <p className="mock-note">Fallback result: check AI_PROVIDER and provider availability for live AI review.</p>}

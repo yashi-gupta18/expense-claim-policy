@@ -15,6 +15,11 @@
   color: #3730a3;
 }
 
+.status-under_review {
+  background: #e0f2fe;
+  color: #075985;
+}
+
 .status-compliant,
 .status-approved {
   background: #dcfce7;

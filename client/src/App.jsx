@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
+import ProtectedRoute from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
+import ClaimantClaimDetail from './pages/ClaimantClaimDetail';
+import ClaimantDashboard from './pages/ClaimantDashboard';
 import Dashboard from './pages/Dashboard';
+import RoleSelection from './pages/RoleSelection';
 import SubmitClaim from './pages/SubmitClaim';
 import ClaimDetail from './pages/ClaimDetail';
 import PolicyManagement from './pages/PolicyManagement';
+import ReviewerHistory from './pages/ReviewerHistory';
 import ReviewHistory from './pages/ReviewHistory';
 
 function App() {
@@ -28,17 +33,21 @@ function App() {
         <Header />
         <div className="page-content">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/submit" element={<SubmitClaim />} />
-            <Route path="/claims/:id" element={<ClaimDetail />} />
-            <Route path="/claims/:id/history" element={<ReviewHistory />} />
-            <Route path="/policies" element={<PolicyManagement />} />
+            <Route path="/" element={<RoleSelection />} />
+            <Route path="/claimant/dashboard" element={<ProtectedRoute role="claimant"><ClaimantDashboard /></ProtectedRoute>} />
+            <Route path="/claimant/submit" element={<ProtectedRoute role="claimant"><SubmitClaim /></ProtectedRoute>} />
+            <Route path="/claimant/claims/:id" element={<ProtectedRoute role="claimant"><ClaimantClaimDetail /></ProtectedRoute>} />
+            <Route path="/reviewer/dashboard" element={<ProtectedRoute role="reviewer"><Dashboard /></ProtectedRoute>} />
+            <Route path="/reviewer/claims/:id" element={<ProtectedRoute role="reviewer"><ClaimDetail /></ProtectedRoute>} />
+            <Route path="/reviewer/claims/:id/history" element={<ProtectedRoute role="reviewer"><ReviewHistory /></ProtectedRoute>} />
+            <Route path="/reviewer/policies" element={<ProtectedRoute role="reviewer"><PolicyManagement /></ProtectedRoute>} />
+            <Route path="/reviewer/history" element={<ProtectedRoute role="reviewer"><ReviewerHistory /></ProtectedRoute>} />
             <Route
               path="*"
               element={
                 <div className="empty-state">
                   <h2>Page not found</h2>
-                  <NavLink className="btn btn-primary" to="/">Back to dashboard</NavLink>
+                  <NavLink className="btn btn-primary" to="/">Choose role</NavLink>
                 </div>
               }
             />

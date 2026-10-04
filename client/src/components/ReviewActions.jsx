@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { getMockSession } from '../utils/mockSession';
 
 function ReviewActions({ onDecision, busy }) {
   const [reason, setReason] = useState('');
   const [overrideClassification, setOverrideClassification] = useState('');
+  const session = getMockSession();
 
   const submit = (action) => {
-    onDecision({ action, reason, reviewer: 'Mock Reviewer', overrideClassification });
+    onDecision({ action, reason, reviewer: session?.name || 'Reviewer', overrideClassification });
   };
 
   return (

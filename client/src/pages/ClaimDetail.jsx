@@ -13,6 +13,7 @@ import { formatCurrency, formatDate, formatDateTime } from '../utils/formatters'
 
 function ClaimDetail() {
   const { id } = useParams();
+  
   const [claim, setClaim] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [audit, setAudit] = useState([]);
@@ -74,11 +75,31 @@ function ClaimDetail() {
           <div><dt>Receipt</dt><dd>{claim.receiptAvailable ? 'Available' : 'Missing'}</dd></div>
         </dl>
         <p>{claim.description}</p>
-        <Link className="table-link" to={`/claims/${id}/history`}>View full review history</Link>
+        <Link className="table-link" to={`/reviewer/claims/${id}/history`}>View full review history</Link>
       </section>
       <AiReviewPanel review={claim.aiReview} onRefresh={refreshAi} refreshing={busy} />
       <ValidationIssues issues={claim.deterministicIssues} />
       <PolicyEvidence evidence={claim.aiReview?.policyEvidence} missing={claim.aiReview?.missingInformation} />
+      {(claim.clarificationRequest || claim.clarificationResponse) && (
+        <section className="detail-card">
+          <h2>Claimant Clarification</h2>
+          {claim.clarificationRequest && (
+            <>
+              <h3>Reviewer Request</h3>
+              <p>{claim.clarificationRequest}</p>
+            </>
+          )}
+          {claim.clarificationResponse ? (
+            <>
+              <h3>Claimant Response</h3>
+              <p>{claim.clarificationResponse}</p>
+              {claim.clarificationProofLink && <a className="table-link" href={claim.clarificationProofLink} target="_blank" rel="noreferrer">Open proof link</a>}
+            </>
+          ) : (
+            <p>No claimant response submitted yet.</p>
+          )}
+        </section>
+      )}
       <ReviewActions onDecision={submitDecision} busy={busy} />
       <section className="detail-card">
         <h2>Decision History</h2>
