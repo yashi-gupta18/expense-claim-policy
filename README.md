@@ -9,8 +9,6 @@ The app supports two user flows:
 
 This project was built for the **Expense Claim Policy Review Assistant** assessment problem.
 
-
-
 ## Problem Statement
 
 Build an internal application that reviews employee expense claims against a provided organizational expense policy.
@@ -25,29 +23,20 @@ Each claim contains:
 - Description
 - Receipt available: yes/no
 
-The system should:
+The system supports:
 
-- Classify ambiguous claim descriptions into policy categories
-- Retrieve the relevant policy section
-- Explain why a claim may comply, require clarification, or need review
-- Ask for missing information when necessary
-- Cite policy evidence behind each finding
-- Clearly mark uncertain classifications
-- Detect duplicate claims
-- Calculate totals
-- Identify missing receipts
-- Check configured category limits
-- Validate dates and required fields
-- Allow reviewers to approve, reject, request clarification, override AI classification, and view complete history
-
-Not included because they are outside the scope:
-
-- Actual reimbursement
-- Payroll integration
-- Tax advice
-- Receipt OCR
-- Payment processing
-
+- Classifying ambiguous claim descriptions into policy categories
+- Retrieving the relevant policy section
+- Explaining why a claim may comply, require clarification, or need review
+- Asking for missing information when necessary
+- Citing policy evidence behind each finding
+- Clearly marking uncertain classifications
+- Detecting duplicate claims
+- Calculating totals
+- Identifying missing receipts
+- Checking configured category limits
+- Validating dates and required fields
+- Allowing reviewers to approve, reject, request clarification, override AI classification, and view complete history
 
 ## Features
 
@@ -76,8 +65,6 @@ Not included because they are outside the scope:
 - View decision history
 - View audit log
 
-
-
 ## Tech Stack
 
 ## Frontend
@@ -103,9 +90,9 @@ Not included because they are outside the scope:
 - Ollama local AI support
 - OpenAI-compatible API support
 
-
 ## Project Structure
 
+```txt
 .
 ├── client
 │   └── src
